@@ -73,6 +73,7 @@ export const VideosList = () => {
     };
 
     const _handleListVideos = () => {
+        console.log("first")
         setPosition(null);
     };
 
@@ -87,6 +88,14 @@ export const VideosList = () => {
 
         if (indexSave !== null) {
             setPosition(indexSave);
+        }
+
+        if (textBtnSiguiente === "Terminar") {
+            setPosition(null);
+        }
+
+        if (textBtnSiguiente === "Enviar") {
+            toast("Tu videocuestionario fue enviado con exito");
         }
     };
 
@@ -188,7 +197,9 @@ export const VideosList = () => {
                                         key={index}
                                         className={recording[index] && "none"}
                                         src={urls[index]}
-                                        controls
+                                        controls={
+                                            urls[index] ? true : false
+                                        }
                                         autoPlay={
                                             urls[index] && position
                                                 ? true
