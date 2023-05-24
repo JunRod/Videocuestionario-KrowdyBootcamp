@@ -18,7 +18,7 @@ h1 {
 }
 
 .container {
-    padding: 0px 130px;
+    padding: 0px 30px;
     text-align: center;
     font-size: 25px;
     color: white;
@@ -31,14 +31,14 @@ h1 {
     gap: 30px;
 }
 
-.container_containerVideo {
+.containerVideoList {
     height: auto;
     display: flex;
     justify-content: center;
     gap: 20px;
 }
 
-.containerVideo {
+.video {
     border-radius: 10px;
     position: relative;
     height: 430px;
@@ -49,7 +49,7 @@ h1 {
     justify-content: end;
 }
 
-.containerVideo_questions {
+.videoQuestion {
     font-size: 20px;
     letter-spacing: normal;
     text-align: center;
@@ -97,11 +97,16 @@ video {
     filter: opacity(0);
 }
 
-.flexButton{
+.containerButtons{
     display: flex;
     justify-content: space-between;
     letter-spacing: normal;
     cursor: pointer;
+}
+
+i.containerButtons{
+    float: left;
+    display: inline;
 }
 
 button:disabled, .disabled {
@@ -109,7 +114,7 @@ button:disabled, .disabled {
     opacity: .5;
 }
 
-.recordingContainer {
+.videoNav {
     padding: 6px;
     display: flex;
     flex-direction: row;

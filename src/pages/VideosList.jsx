@@ -1,17 +1,24 @@
 import { useEffect, useRef, useState } from "react";
-import { Toaster, toast } from "sonner";
+import { formatedTime } from "../helpers/formatSeconds";
+import { ToasterComponent } from "../components/Toaster";
+import { toast } from "sonner";
 import questions from "./questions.json";
-import play from "./../images/play.svg";
-import repeat from "./../images/repeat.svg";
-import stop from "./../images/stop.svg";
-import record from "./../images/record.svg";
+
+import { ListaVideosComponent } from "../components/ListaVideosComponent";
+import { ReturnIcon } from "../components/ReturnIcon";
+import { RecordingComponent } from "../components/RecordingComponent";
+import { Player } from "../components/Player";
+import { Recorder } from "../components/Recorder";
+import { ButtonSiguienteTerminarEnviar } from "../components/ButtonSiguienteTerminarEnviar";
+import { ButtonAtras } from "../components/ButtonAtras";
+import { Question } from "../components/Question";
 
 let mediaRecorder;
 let config = { audio: true, video: true };
 let recordingPositions = Object.keys(questions).map(() => false);
 let urlsPositions = Object.keys(questions).map(() => null);
+let stream;
 const maxRecordingTime = 120;
-let stream
 
 export const VideosList = () => {
     const [recording, setRecording] = useState(recordingPositions);
@@ -20,19 +27,15 @@ export const VideosList = () => {
     const [urls, setUrls] = useState(urlsPositions);
     const [textBtnSiguiente, setTextBtnSiguiente] = useState("Enviar");
     const [recordingTime, setRecordingTime] = useState(0);
-    const [videoLocalSrc, setVideoLocalSrc] = useState(null)
-    const videoRef = useRef(null)
+    const [videoLocalSrc, setVideoLocalSrc] = useState(null);
+    const videoRef = useRef(null);
 
     useEffect(() => {
-
         if (recording[position]) {
             const playVideoFromCamera = async () => {
+                stream = await navigator.mediaDevices.getUserMedia(config);
 
-                stream = await navigator.mediaDevices.getUserMedia(
-                    config
-                );
-                
-                setVideoLocalSrc(stream)
+                setVideoLocalSrc(stream);
 
                 mediaRecorder = new MediaRecorder(stream);
 
@@ -58,15 +61,13 @@ export const VideosList = () => {
             mediaRecorder.stop();
             stream.getTracks().forEach((track) => track.stop());
         }
-
     }, [recording[position]]);
 
     useEffect(() => {
         if (videoRef.current && videoLocalSrc) {
             videoRef.current.srcObject = videoLocalSrc;
-          }
-    }, [videoLocalSrc])
-    
+        }
+    }, [videoLocalSrc]);
 
     useEffect(() => {
         setUrls((prevUrls) => {
@@ -88,16 +89,6 @@ export const VideosList = () => {
         setPosition(index);
     };
 
-    const formatedTime = (seconds) => {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-
-        const formattedMinutes = String(minutes);
-        const formattedSeconds = String(remainingSeconds).padStart(2, "0");
-
-        return `${formattedMinutes}:${formattedSeconds}`;
-    };
-
     useEffect(() => {
         let interval;
 
@@ -111,6 +102,8 @@ export const VideosList = () => {
                     return prevTime + 1;
                 });
             }, 1000);
+        } else {
+            setRecordingTime(0);
         }
 
         return () => {
@@ -172,28 +165,15 @@ export const VideosList = () => {
 
     return (
         <>
-            <Toaster
-                position="top-center"
-                toastOptions={{
-                    style: {
-                        background: "rgba(254, 117, 66, 1)",
-                        fontSize: "20px",
-                        letterSpacing: "normal",
-                        color: "white",
-                        textAlign: "center",
-                    },
-                }}
-            />
-
+            <ToasterComponent />
             <div className="container">
                 {position !== null ? (
-                    <nav
-                        className={`flexButton${
-                            recording[position] ? " disabled" : ""
-                        }`}
-                        onClick={!recording[position] ? _handleListVideos : undefined}
-                    >
-                        <p>Lista de videos</p>
+                    <nav>
+                        <ListaVideosComponent
+                            recording={recording}
+                            position={position}
+                            _handleListVideos={_handleListVideos}
+                        />
                     </nav>
                 ) : (
                     <></>
@@ -202,105 +182,73 @@ export const VideosList = () => {
                 <header>
                     <h1>VIDEOCUESTIONARIO</h1>
                 </header>
-                <main className="container_containerVideo">
+
+                <main className="containerVideoList">
                     {Object.keys(questions)
                         .filter((question, index) => {
                             if (position !== null) {
                                 return position === index && question;
                             }
-                            //Devolver todos las questions si position es null
                             return question;
                         })
                         .map((question) => {
                             const index = Number(question);
 
                             return (
-                                <div className="containerVideo" key={question}>
-                                    <div className="recordingContainer">
-                                        <img
-                                            src={
-                                                urls[index] && recording[index]
-                                                    ? stop
-                                                    : urls[index]
-                                                    ? repeat
-                                                    : recording[index]
-                                                    ? stop
-                                                    : play
-                                            }
-                                            className="containerVideo_play"
-                                            onClick={() =>
-                                                _handleRecordingPaused(index)
+                                <div className="video" key={question}>
+                                    <div className="videoNav">
+                                        <ReturnIcon
+                                            urls={urls}
+                                            index={index}
+                                            recording={recording}
+                                            _handleRecordingPaused={
+                                                _handleRecordingPaused
                                             }
                                         />
 
-                                        {/* Recording Time Component*/}
                                         {recording[position] && (
-                                            <div className="containerRecording">
-                                                <div className="recordingTime">
-                                                    {formatedTime(
-                                                        recordingTime
-                                                    )}
-                                                    /
-                                                    {formatedTime(
-                                                        maxRecordingTime
-                                                    )}
-                                                </div>
-                                                <img src={record} />
-                                            </div>
+                                            <RecordingComponent
+                                                recordingTime={recordingTime}
+                                                maxRecordingTime={
+                                                    maxRecordingTime
+                                                }
+                                            />
                                         )}
                                     </div>
 
                                     {recording[index] && (
-                                        <video
-                                            ref={videoRef}
-                                            autoPlay
-                                            muted
-                                        ></video>
+                                        <Player videoRef={videoRef} />
                                     )}
-                                    <video
-                                        key={index}
-                                        className={recording[index] ? "none" : ""}
-                                        src={urls[index]}
-                                        controls={urls[index] ? true : false}
-                                        autoPlay={
-                                            position !== null
-                                                ? true
-                                                : false
-                                        }
-                                    ></video>
-                                    <div className="containerVideo_questions">
-                                        {questions[question]}
-                                    </div>
+                                    <Recorder
+                                        index={index}
+                                        recording={recording}
+                                        urls={urls}
+                                        position={position}
+                                    />
+
+                                    <Question
+                                        questions={questions}
+                                        question={question}
+                                    />
                                 </div>
                             );
                         })}
                 </main>
-                <div className="flexButton">
-                    {
-                        <button
-                            className={
-                                position === null
-                                    ? "transparent"
-                                    : recording[position]
-                                    ? " disabled"
-                                    : ""
-                            }
-                            onClick={!recording[position] ? _handleBack : undefined}
-                        >
-                            Atrás
-                        </button>
-                    }
 
-                    <button
-                        className={`${recording[position] ? " disabled" : ""}`}
-                        onClick={!recording[position] ? _handleFilterEmptys : undefined}
-                        disabled={urls.some(
-                            (url) =>
-                                url === null && textBtnSiguiente === "Enviar"
-                        )}
-                    >
-                        {textBtnSiguiente}
-                    </button>
+                <div className="containerButtons">
+                    <ButtonAtras
+                        position={position}
+                        recording={recording}
+                        _handleBack={_handleBack}
+                    />
+
+                    <ButtonSiguienteTerminarEnviar
+                        recording={recording}
+                        position={position}
+                        _handleFilterEmptys={_handleFilterEmptys}
+                        textBtnSiguiente={textBtnSiguiente}
+                        urls={urls}
+                    />
                 </div>
             </div>
         </>
