@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Toaster, toast } from "sonner";
 import questions from "./questions.json";
 import play from "./../images/play.svg";
 import repeat from "./../images/repeat.svg";
 import stop from "./../images/stop.svg";
+import record from "./../images/record.svg";
 
 let mediaRecorder;
 let config = { audio: true, video: true };
 let recordingPositions = Object.keys(questions).map(() => false);
 let urlsPositions = Object.keys(questions).map(() => null);
+const maxRecordingTime = 120;
+let stream
 
 export const VideosList = () => {
     const [recording, setRecording] = useState(recordingPositions);
@@ -16,16 +19,19 @@ export const VideosList = () => {
     const [blobs, setBlobs] = useState([]);
     const [urls, setUrls] = useState(urlsPositions);
     const [textBtnSiguiente, setTextBtnSiguiente] = useState("Enviar");
+    const [recordingTime, setRecordingTime] = useState(0);
+    const [videoLocalSrc, setVideoLocalSrc] = useState(null)
+    const videoRef = useRef(null)
 
     useEffect(() => {
+
         if (recording[position]) {
             const playVideoFromCamera = async () => {
-                const stream = await navigator.mediaDevices.getUserMedia(
+                stream = await navigator.mediaDevices.getUserMedia(
                     config
                 );
-
-                const videoLocal = document.getElementById("videoLocal");
-                videoLocal.srcObject = stream;
+                
+                setVideoLocalSrc(stream)
 
                 mediaRecorder = new MediaRecorder(stream);
 
@@ -44,14 +50,22 @@ export const VideosList = () => {
             };
 
             playVideoFromCamera();
-
             return;
         }
 
         if (mediaRecorder) {
             mediaRecorder.stop();
+            stream.getTracks().forEach((track) => track.stop());
         }
+
     }, [recording[position]]);
+
+    useEffect(() => {
+        if (videoRef.current && videoLocalSrc) {
+            videoRef.current.srcObject = videoLocalSrc;
+          }
+    }, [videoLocalSrc])
+    
 
     useEffect(() => {
         setUrls((prevUrls) => {
@@ -69,11 +83,41 @@ export const VideosList = () => {
             newArray[index] = !newArray[index];
             return newArray;
         });
+
         setPosition(index);
     };
 
+    const formatedTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+
+        const formattedMinutes = String(minutes);
+        const formattedSeconds = String(remainingSeconds).padStart(2, "0");
+
+        return `${formattedMinutes}:${formattedSeconds}`;
+    };
+
+    useEffect(() => {
+        let interval;
+
+        if (recording[position]) {
+            interval = setInterval(() => {
+                setRecordingTime((prevTime) => {
+                    if (prevTime === maxRecordingTime) {
+                        recording[position] = !recording[position];
+                        return 0;
+                    }
+                    return prevTime + 1;
+                });
+            }, 1000);
+        }
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, [recording[position]]);
+
     const _handleListVideos = () => {
-        console.log("first")
         setPosition(null);
     };
 
@@ -171,24 +215,43 @@ export const VideosList = () => {
 
                             return (
                                 <div className="containerVideo">
-                                    <img
-                                        src={
-                                            urls[index] && recording[index]
-                                                ? stop
-                                                : urls[index]
-                                                ? repeat
-                                                : recording[index]
-                                                ? stop
-                                                : play
-                                        }
-                                        className="containerVideo_play"
-                                        onClick={() =>
-                                            _handleRecordingPaused(index)
-                                        }
-                                    />
+                                    <div className="recordingContainer">
+                                        <img
+                                            src={
+                                                urls[index] && recording[index]
+                                                    ? stop
+                                                    : urls[index]
+                                                    ? repeat
+                                                    : recording[index]
+                                                    ? stop
+                                                    : play
+                                            }
+                                            className="containerVideo_play"
+                                            onClick={() =>
+                                                _handleRecordingPaused(index)
+                                            }
+                                        />
+
+                                        {/* Recording Time Component*/}
+                                        {recording[position] && (
+                                            <div className="containerRecording">
+                                                <div className="recordingTime">
+                                                    {formatedTime(
+                                                        recordingTime
+                                                    )}
+                                                    /
+                                                    {formatedTime(
+                                                        maxRecordingTime
+                                                    )}
+                                                </div>
+                                                <img src={record} />
+                                            </div>
+                                        )}
+                                    </div>
+
                                     {recording[index] && (
                                         <video
-                                            id="videoLocal"
+                                            ref={videoRef}
                                             autoPlay
                                             muted
                                         ></video>
@@ -197,9 +260,7 @@ export const VideosList = () => {
                                         key={index}
                                         className={recording[index] && "none"}
                                         src={urls[index]}
-                                        controls={
-                                            urls[index] ? true : false
-                                        }
+                                        controls={urls[index] ? true : false}
                                         autoPlay={
                                             urls[index] && position
                                                 ? true
