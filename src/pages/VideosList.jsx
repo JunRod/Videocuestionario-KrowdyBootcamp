@@ -27,6 +27,7 @@ export const VideosList = () => {
 
         if (recording[position]) {
             const playVideoFromCamera = async () => {
+
                 stream = await navigator.mediaDevices.getUserMedia(
                     config
                 );
@@ -190,7 +191,7 @@ export const VideosList = () => {
                         className={`flexButton${
                             recording[position] ? " disabled" : ""
                         }`}
-                        onClick={!recording[position] && _handleListVideos}
+                        onClick={!recording[position] ? _handleListVideos : undefined}
                     >
                         <p>Lista de videos</p>
                     </nav>
@@ -214,7 +215,7 @@ export const VideosList = () => {
                             const index = Number(question);
 
                             return (
-                                <div className="containerVideo">
+                                <div className="containerVideo" key={question}>
                                     <div className="recordingContainer">
                                         <img
                                             src={
@@ -258,11 +259,11 @@ export const VideosList = () => {
                                     )}
                                     <video
                                         key={index}
-                                        className={recording[index] && "none"}
+                                        className={recording[index] ? "none" : ""}
                                         src={urls[index]}
                                         controls={urls[index] ? true : false}
                                         autoPlay={
-                                            urls[index] && position
+                                            position !== null
                                                 ? true
                                                 : false
                                         }
@@ -284,7 +285,7 @@ export const VideosList = () => {
                                     ? " disabled"
                                     : ""
                             }
-                            onClick={!recording[position] && _handleBack}
+                            onClick={!recording[position] ? _handleBack : undefined}
                         >
                             Atrás
                         </button>
@@ -292,7 +293,7 @@ export const VideosList = () => {
 
                     <button
                         className={`${recording[position] ? " disabled" : ""}`}
-                        onClick={!recording[position] && _handleFilterEmptys}
+                        onClick={!recording[position] ? _handleFilterEmptys : undefined}
                         disabled={urls.some(
                             (url) =>
                                 url === null && textBtnSiguiente === "Enviar"
