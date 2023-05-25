@@ -12,7 +12,6 @@ export const ButtonAtras = ({position, recording, _handleBack}) => {
         return !recording[position] ? _handleBack : undefined
     }
 
-
     return (
         <button
             className={logicClass()}

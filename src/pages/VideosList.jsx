@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { formatedTime } from "../helpers/formatSeconds";
 import { ToasterComponent } from "../components/Toaster";
 import { toast } from "sonner";
 import questions from "./questions.json";
@@ -7,7 +6,7 @@ import questions from "./questions.json";
 import { ListaVideosComponent } from "../components/ListaVideosComponent";
 import { ReturnIcon } from "../components/ReturnIcon";
 import { RecordingComponent } from "../components/RecordingComponent";
-import { Player } from "../components/Player";
+import { VideoPlayer } from "../components/VideoPlayer";
 import { Recorder } from "../components/Recorder";
 import { ButtonSiguienteTerminarEnviar } from "../components/ButtonSiguienteTerminarEnviar";
 import { ButtonAtras } from "../components/ButtonAtras";
@@ -15,242 +14,273 @@ import { Question } from "../components/Question";
 
 let mediaRecorder;
 let config = { audio: true, video: true };
-let recordingPositions = Object.keys(questions).map(() => false);
-let urlsPositions = Object.keys(questions).map(() => null);
 let stream;
-const maxRecordingTime = 120;
+const maxRecordingTime = 120; // = 2 minutos
 
 export const VideosList = () => {
-    const [recording, setRecording] = useState(recordingPositions);
-    const [position, setPosition] = useState(null);
-    const [blobs, setBlobs] = useState([]);
-    const [urls, setUrls] = useState(urlsPositions);
-    const [textBtnSiguiente, setTextBtnSiguiente] = useState("Enviar");
-    const [recordingTime, setRecordingTime] = useState(0);
-    const [videoLocalSrc, setVideoLocalSrc] = useState(null);
-    const videoRef = useRef(null);
+  const [lastEmptyIndex, setLastEmptyIndex] = useState(-1);
+  const [textBtnSiguiente, setTextBtnSiguiente] = useState("Enviar");
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [videoLocalSrc, setVideoLocalSrc] = useState(null);
+  const [recording, setRecording] = useState(() =>
+    Object.keys(questions).map(() => false)
+  );
+  const [position, setPosition] = useState(null);
+  const [blobs, setBlobs] = useState([]);
+  const [urls, setUrls] = useState(() =>
+    Object.keys(questions).map(() => null)
+  );
+  const videoRef = useRef(null);
+  const [stop, setStop] = useState(false);
 
-    useEffect(() => {
-        if (recording[position]) {
-            const playVideoFromCamera = async () => {
-                stream = await navigator.mediaDevices.getUserMedia(config);
+  useEffect(() => {
+    //Grabar
+    if (recording[position]) {
+      //  Si existe la url de la posicion x en el array de urls, eliminarlo
+      if (urls[position]) {
+        urls[position] = null;
+      }
 
-                setVideoLocalSrc(stream);
+      const playVideoFromCamera = async () => {
+        stream = await navigator.mediaDevices.getUserMedia(config);
 
-                mediaRecorder = new MediaRecorder(stream);
+        setVideoLocalSrc(stream);
 
-                mediaRecorder.start();
+        mediaRecorder = new MediaRecorder(stream);
 
-                //Si existe la url de la posicion x en el array de urls, eliminarlo
-                urls[position] && null;
+        mediaRecorder.start();
 
-                mediaRecorder.addEventListener("dataavailable", (event) => {
-                    setBlobs((prevUrls) => {
-                        const newArray = [...prevUrls];
-                        newArray[position] = event.data;
-                        return newArray;
-                    });
-                });
-            };
-
-            playVideoFromCamera();
-            return;
-        }
-
-        if (mediaRecorder) {
-            mediaRecorder.stop();
-            stream.getTracks().forEach((track) => track.stop());
-        }
-    }, [recording[position]]);
-
-    useEffect(() => {
-        if (videoRef.current && videoLocalSrc) {
-            videoRef.current.srcObject = videoLocalSrc;
-        }
-    }, [videoLocalSrc]);
-
-    useEffect(() => {
-        setUrls((prevUrls) => {
+        mediaRecorder.addEventListener("dataavailable", (event) => {
+          setBlobs((prevUrls) => {
             const newArray = [...prevUrls];
-            if (blobs[position]) {
-                newArray[position] = URL.createObjectURL(blobs[position]);
-            }
+            newArray[position] = event.data;
             return newArray;
+          });
         });
-    }, [blobs[position]]);
+      };
 
-    const _handleRecordingPaused = (index) => {
-        setRecording((prevRecording) => {
-            const newArray = [...prevRecording];
-            newArray[index] = !newArray[index];
-            return newArray;
+      playVideoFromCamera();
+      return;
+    }
+
+    //Si mediaRecorder tiene algo (evita que se ejecute éste bloque al iniciar por primera vez), Detiene la grabación
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      stream.getTracks().forEach((track) => track.stop());
+    }
+  }, [recording[position]]);
+
+  //Introduce el video grabado en Recorder
+  useEffect(() => {
+    if (videoLocalSrc !== null && videoRef.current !== null) {
+      videoRef.current.srcObject = videoLocalSrc;
+    }
+  }, [videoLocalSrc]);
+
+  //Transforma los blobs en urls y los guarda en el state de urls
+  useEffect(() => {
+    setUrls((prevUrls) => {
+      const newArray = [...prevUrls];
+      if (blobs[position]) {
+        newArray[position] = URL.createObjectURL(blobs[position]);
+      }
+      return newArray;
+    });
+  }, [blobs[position]]);
+
+  //Minutos y secundos
+  useEffect(() => {
+    let interval;
+
+    if (recording[position]) {
+      interval = setInterval(() => {
+        setRecordingTime((prevTime) => {
+          if (prevTime === maxRecordingTime) {
+            recording[position] = !recording[position];
+            return 0;
+          }
+          return prevTime + 1;
         });
+      }, 1000);
+    } else {
+      setRecordingTime(0);
+    }
 
-        setPosition(index);
+    return () => {
+      clearInterval(interval);
     };
+  }, [recording[position]]);
 
-    useEffect(() => {
-        let interval;
+  useEffect(() => {
+    //Si todas las urls están llenos
+    if (urls.every((url) => url !== null)) {
+      setTextBtnSiguiente("Terminar");
 
-        if (recording[position]) {
-            interval = setInterval(() => {
-                setRecordingTime((prevTime) => {
-                    if (prevTime === maxRecordingTime) {
-                        recording[position] = !recording[position];
-                        return 0;
-                    }
-                    return prevTime + 1;
-                });
-            }, 1000);
-        } else {
-            setRecordingTime(0);
-        }
+      //Si todos los campos de urls están llenos y Position es Null (Mostrando lista)
+      if (position === null) {
+        setTextBtnSiguiente("Enviar");
+      }
+    } else {
+      if (position === null) {
+        setTextBtnSiguiente("Enviar");
+      }
+    }
+  }, [urls]);
 
-        return () => {
-            clearInterval(interval);
-        };
-    }, [recording[position]]);
+  //Si position tiene un index significa que hay un video mostrando: Imprimir "Siguiente" en boton
+  useEffect(() => {
+    if (position !== null) {
+      setTextBtnSiguiente("Siguiente");
+    }
+  }, [position]);
 
-    const _handleListVideos = () => {
-        setPosition(null);
-    };
+  //Para saber que video se está (re)grabando o pausando
+  const _handleRecordPause = (index) => {
+    setRecording((prevRecording) => {
+      const newArray = [...prevRecording];
+      newArray[index] = !newArray[index];
+      return newArray;
+    });
 
-    const _handleFilterEmptys = () => {
-        const indexSave = urls.reduce((minIndex, url, index) => {
-            if (url === null && (minIndex === null || index < minIndex)) {
-                return index;
-            } else {
-                return minIndex;
-            }
-        }, null);
+    setPosition(index);
+  };
 
-        if (indexSave !== null) {
-            setPosition(indexSave);
-        }
+  const _handleListVideos = () => {
+    setPosition(null);
+  };
 
-        if (textBtnSiguiente === "Terminar") {
-            setPosition(null);
-        }
-
-        if (textBtnSiguiente === "Enviar") {
-            toast("Tu videocuestionario fue enviado con exito");
-        }
-    };
-
-    useEffect(() => {
-        if (urls.every((url) => url !== null)) {
-            setTextBtnSiguiente("Terminar");
-
-            //Si todos los campos de urls están llenos y Position es Null (Mostrando lista)
-            if (position === null) {
-                setTextBtnSiguiente("Enviar");
-            }
-        }
-    }, [urls]);
-
-    useEffect(() => {
-        if (position !== null) {
-            setTextBtnSiguiente("Siguiente");
-        } else {
-            setTextBtnSiguiente("Enviar");
-        }
-    }, [position]);
-
-    const _handleBack = () => {
-        if (position - 1 < 0) {
-            return setPosition(3);
-        }
-        return setPosition(position - 1);
-    };
-
-    return (
-        <>
-            <ToasterComponent />
-            <div className="container">
-                {position !== null ? (
-                    <nav>
-                        <ListaVideosComponent
-                            recording={recording}
-                            position={position}
-                            _handleListVideos={_handleListVideos}
-                        />
-                    </nav>
-                ) : (
-                    <></>
-                )}
-
-                <header>
-                    <h1>VIDEOCUESTIONARIO</h1>
-                </header>
-
-                <main className="containerVideoList">
-                    {Object.keys(questions)
-                        .filter((question, index) => {
-                            if (position !== null) {
-                                return position === index && question;
-                            }
-                            return question;
-                        })
-                        .map((question) => {
-                            const index = Number(question);
-
-                            return (
-                                <div className="video" key={question}>
-                                    <div className="videoNav">
-                                        <ReturnIcon
-                                            urls={urls}
-                                            index={index}
-                                            recording={recording}
-                                            _handleRecordingPaused={
-                                                _handleRecordingPaused
-                                            }
-                                        />
-
-                                        {recording[position] && (
-                                            <RecordingComponent
-                                                recordingTime={recordingTime}
-                                                maxRecordingTime={
-                                                    maxRecordingTime
-                                                }
-                                            />
-                                        )}
-                                    </div>
-
-                                    {recording[index] && (
-                                        <Player videoRef={videoRef} />
-                                    )}
-                                    <Recorder
-                                        index={index}
-                                        recording={recording}
-                                        urls={urls}
-                                        position={position}
-                                    />
-
-                                    <Question
-                                        questions={questions}
-                                        question={question}
-                                    />
-                                </div>
-                            );
-                        })}
-                </main>
-
-                <div className="containerButtons">
-                    <ButtonAtras
-                        position={position}
-                        recording={recording}
-                        _handleBack={_handleBack}
-                    />
-
-                    <ButtonSiguienteTerminarEnviar
-                        recording={recording}
-                        position={position}
-                        _handleFilterEmptys={_handleFilterEmptys}
-                        textBtnSiguiente={textBtnSiguiente}
-                        urls={urls}
-                    />
-                </div>
-            </div>
-        </>
+  //Filtramos las posiciones vacias del state urls o null si están llenos
+  const filterEmptys = () => {
+    const indexSave = urls.findIndex(
+      (url, index) => url === null && index > lastEmptyIndex
     );
+
+    if (indexSave !== -1) {
+      setPosition(indexSave);
+      setLastEmptyIndex(indexSave);
+    } else {
+      // Si no se encuentra una posición vacía después del último índice vacío encontrado,
+      // se vuelve a buscar desde el principio del array
+      const newIndexSave = urls.findIndex(
+        (url, index) => url === null && index <= lastEmptyIndex
+      );
+
+      if (newIndexSave !== -1) {
+        setPosition(newIndexSave);
+        setLastEmptyIndex(newIndexSave);
+      }
+    }
+  };
+
+  //Funcionalidades del Boton: Filtrar "emptys" de urls o ir a la lista de videos o notificacion
+  const _handleButtonFunctions = () => {
+    filterEmptys();
+
+    if (textBtnSiguiente === "Terminar") {
+      setPosition(null);
+    }
+
+    if (textBtnSiguiente === "Enviar") {
+      toast("Tu videocuestionario fue enviado con exito");
+    }
+  };
+
+  //Retroceder al videopregunta anterior
+  const _handleBack = () => {
+    setStop(true);
+    if (position - 1 < 0) {
+      return setPosition(3);
+    }
+    return setPosition(position - 1);
+  };
+
+  return (
+    <>
+      <ToasterComponent />
+      <div className="container">
+        {position !== null ? (
+          <nav>
+            <ListaVideosComponent
+              recording={recording}
+              position={position}
+              _handleListVideos={_handleListVideos}
+            />
+            <div className="lineDecoration" />
+          </nav>
+        ) : (
+          <></>
+        )}
+
+        <header>
+          <h1>VIDEOCUESTIONARIO</h1>
+        </header>
+
+        <main
+          className="containerVideoList"
+          style={{
+            gridTemplateColumns: `repeat(${position !== null ? 1 : 4}, 1fr)`,
+            width: `${position !== null ? "50%" : "100%"}`,
+          }}
+        >
+          {Object.keys(questions)
+            .filter((question, index) => {
+              if (position !== null) {
+                return position === index && question;
+              }
+              return question;
+            })
+            .map((question) => {
+              const index = Number(question);
+
+              return (
+                <div className="video" key={question}>
+                  <div className="videoNav">
+                    <ReturnIcon
+                      urls={urls}
+                      index={index}
+                      recording={recording}
+                      _handleRecordPause={_handleRecordPause}
+                    />
+
+                    {recording[position] && (
+                      <RecordingComponent
+                        recordingTime={recordingTime}
+                        maxRecordingTime={maxRecordingTime}
+                      />
+                    )}
+                  </div>
+
+                  {recording[index] && <Recorder videoRef={videoRef} />}
+                  <VideoPlayer
+                    stop={stop}
+                    index={index}
+                    recording={recording}
+                    urls={urls}
+                    position={position}
+                  />
+
+                  <Question questions={questions} question={question} />
+                </div>
+              );
+            })}
+        </main>
+
+        <div className="containerButtons">
+          <ButtonAtras
+            position={position}
+            recording={recording}
+            _handleBack={_handleBack}
+          />
+
+          <ButtonSiguienteTerminarEnviar
+            recording={recording}
+            position={position}
+            _handleButtonFunctions={_handleButtonFunctions}
+            textBtnSiguiente={textBtnSiguiente}
+            urls={urls}
+          />
+        </div>
+      </div>
+    </>
+  );
 };
