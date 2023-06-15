@@ -1,5 +1,5 @@
 import { formatedTime } from "../helpers/formatSeconds";
-import record from "./../images/record.svg";
+import record from "/images/record.svg";
 
 export const RecordingComponent = ({recordingTime, maxRecordingTime}) => {
     return (

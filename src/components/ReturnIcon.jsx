@@ -1,6 +1,6 @@
-import play from "./../images/play.svg";
-import repeat from "./../images/repeat.svg";
-import stop from "./../images/stop.svg";
+import play from "/images/play.svg";
+import repeat from "/images/repeat.svg";
+import stop from "/images/stop.svg";
 
 export const ReturnIcon = ({urls, index, recording, _handleRecordPause}) => {
     return (
