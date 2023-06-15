@@ -2,7 +2,7 @@ export const ButtonSiguienteTerminarEnviar = ({
     recording,
     position,
     _handleButtonFunctions,
-    textBtnSiguiente,
+    textBtnNext,
     urls,
 }) => {
     return (
@@ -10,10 +10,10 @@ export const ButtonSiguienteTerminarEnviar = ({
             className={`${recording[position] ? " disabled" : ""}`}
             onClick={!recording[position] ? _handleButtonFunctions : undefined}
             disabled={urls.some(
-                (url) => url === null && textBtnSiguiente === "Enviar"
+                (url) => url === null && textBtnNext === "Enviar"
             )}
         >
-            {textBtnSiguiente}
+            {textBtnNext}
         </button>
     );
 };

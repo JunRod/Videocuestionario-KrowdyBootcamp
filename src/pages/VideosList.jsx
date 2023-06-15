@@ -19,7 +19,7 @@ const maxRecordingTime = 120; // = 2 minutos
 
 export const VideosList = () => {
   const [lastEmptyIndex, setLastEmptyIndex] = useState(-1);
-  const [textBtnSiguiente, setTextBtnSiguiente] = useState("Enviar");
+  const [textBtnNext, setTextBtnNext] = useState("Enviar");
   const [recordingTime, setRecordingTime] = useState(0);
   const [videoLocalSrc, setVideoLocalSrc] = useState(null);
   const [recording, setRecording] = useState(() =>
@@ -33,40 +33,62 @@ export const VideosList = () => {
   const videoRef = useRef(null);
   const [stop, setStop] = useState(false);
 
+
+  const startRecording = async () => {
+    setVideoLocalSrc(stream);
+
+    mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.start();
+
+    mediaRecorder.addEventListener("dataavailable", (event) => {
+      setBlobs((prevUrls) => {
+        const newArray = [...prevUrls];
+        newArray[position] = event.data;
+        return newArray;
+      });
+    });
+  };
+
+  const requestCameraPermission = async () => {
+    stream = await navigator.mediaDevices.getUserMedia(config);
+    startRecording();
+  };
+
+  const deleteVideoInPosition = () => {
+    if (urls[position]) {
+      urls[position] = null;
+    }
+  }
+
+  const permissionsNotGranted = () => {
+    setRecording(recording.map((value) => value === true ? false : value))
+        setPosition(null)
+        toast("El usuario no ha otorgado permiso para acceder a la cámara y audio")
+  }
+
+  const stopRecording = () => {
+    mediaRecorder.stop();
+      stream.getTracks().forEach((track) => track.stop());
+  }
+
   useEffect(() => {
-    //Grabar
     if (recording[position]) {
-      //  Si existe la url de la posicion x en el array de urls, eliminarlo
-      if (urls[position]) {
-        urls[position] = null;
+
+      if (confirm("¿Deseas encender la cámara y audio para grabar?")) {
+        //Si existe la url de la posicion x en el array de urls, eliminarlo para volver a generar nuevo video
+        deleteVideoInPosition()
+        requestCameraPermission()
+
+      } else {
+        permissionsNotGranted()
+        return
       }
-
-      const playVideoFromCamera = async () => {
-        stream = await navigator.mediaDevices.getUserMedia(config);
-
-        setVideoLocalSrc(stream);
-
-        mediaRecorder = new MediaRecorder(stream);
-
-        mediaRecorder.start();
-
-        mediaRecorder.addEventListener("dataavailable", (event) => {
-          setBlobs((prevUrls) => {
-            const newArray = [...prevUrls];
-            newArray[position] = event.data;
-            return newArray;
-          });
-        });
-      };
-
-      playVideoFromCamera();
-      return;
     }
 
     //Si mediaRecorder tiene algo (evita que se ejecute éste bloque al iniciar por primera vez), Detiene la grabación
     if (mediaRecorder) {
-      mediaRecorder.stop();
-      stream.getTracks().forEach((track) => track.stop());
+      stopRecording()
     }
   }, [recording[position]]);
 
@@ -114,15 +136,15 @@ export const VideosList = () => {
   useEffect(() => {
     //Si todas las urls están llenos
     if (urls.every((url) => url !== null)) {
-      setTextBtnSiguiente("Terminar");
+      setTextBtnNext("Terminar");
 
       //Si todos los campos de urls están llenos y Position es Null (Mostrando lista)
       if (position === null) {
-        setTextBtnSiguiente("Enviar");
+        setTextBtnNext("Enviar");
       }
     } else {
       if (position === null) {
-        setTextBtnSiguiente("Enviar");
+        setTextBtnNext("Enviar");
       }
     }
   }, [urls]);
@@ -130,7 +152,7 @@ export const VideosList = () => {
   //Si position tiene un index significa que hay un video mostrando: Imprimir "Siguiente" en boton
   useEffect(() => {
     if (position !== null) {
-      setTextBtnSiguiente("Siguiente");
+      setTextBtnNext("Siguiente");
     }
   }, [position]);
 
@@ -176,11 +198,11 @@ export const VideosList = () => {
   const _handleButtonFunctions = () => {
     filterEmptys();
 
-    if (textBtnSiguiente === "Terminar") {
+    if (textBtnNext === "Terminar") {
       setPosition(null);
     }
 
-    if (textBtnSiguiente === "Enviar") {
+    if (textBtnNext === "Enviar") {
       toast("Tu videocuestionario fue enviado con exito");
     }
   };
@@ -276,7 +298,7 @@ export const VideosList = () => {
             recording={recording}
             position={position}
             _handleButtonFunctions={_handleButtonFunctions}
-            textBtnSiguiente={textBtnSiguiente}
+            textBtnNext={textBtnNext}
             urls={urls}
           />
         </div>
