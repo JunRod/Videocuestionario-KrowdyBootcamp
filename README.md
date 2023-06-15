@@ -9,6 +9,10 @@
 - Logica del boton terminar
 - Reproducir video en la vista lista
 - Configurable
+- Solicitar permisos para grabar audio y video
+- Enviar videos
+- Retrocer a cualquier video en la vista video
+- Ir a la siguiente pregunta por responder
   - Tener una estructura facil de modificar y se pueda extender a mas de las 4 preguntas que se solicito.
 
 ## Uso
