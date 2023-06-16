@@ -238,11 +238,8 @@ export const VideosList = () => {
         </header>
 
         <main
-          className="containerVideoList"
-          style={{
-            gridTemplateColumns: `repeat(${position !== null ? 1 : 4}, 1fr)`,
-            width: `${position !== null ? "50%" : "100%"}`,
-          }}
+          className={`containerVideoList ${position !== null && "oneGrid" }`
+        }
         >
           {Object.keys(questions)
             .filter((question, index) => {

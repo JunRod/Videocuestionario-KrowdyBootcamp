@@ -35,6 +35,8 @@ h1 {
     height: auto;
     display: grid;
     justify-content: center;
+    grid-template-columns: repeat(4, 1fr);
+    width: 100%;
     gap: 20px;
 }
 
@@ -160,4 +162,9 @@ button:disabled, .disabled {
     z-index: 10;
     position: relative;
     height: 100%;
+}
+
+.oneGrid {
+    grid-template-columns: repeat(1, 1fr) !important;
+    width: 50% !important;
 }
