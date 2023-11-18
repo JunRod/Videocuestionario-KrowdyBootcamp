@@ -10,7 +10,7 @@ Para utilizar la aplicación, siga estos pasos:
 
 - Abra la aplicación en su navegador web visitando el enlace Videocuestionario KrowdyBootcamp .
 - La aplicación le permite grabar videos basados ​​en un conjunto de preguntas. De forma predeterminada, hay 4 preguntas predefinidas disponibles.
-- Para comenzar a grabar, haga clic en el botón "Grabar" (Grabar) al lado de una pregunta.
+- Para comenzar a grabar, haga clic en el botón "Grabar" al lado de una pregunta.
 - Otorgue permiso para acceder a su cámara y micrófono si se le solicita.
 - La grabación comenzará automáticamente y el temporizador indicará el tiempo transcurrido.
 - Puede pausar y reanudar la grabación haciendo clic en el icono de pausa durante el proceso de grabación.
