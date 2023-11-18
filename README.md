@@ -1,19 +1,9 @@
 # [Videocuestionario KrowdyBootcamp](https://videocuestionario-krowdy-bootcamp.vercel.app/)
 
-## Principales funcionalidades
-- Se pueda cambiar de vista
-- Se pueda grabar
-- Regrabar
-- Detener
-- Que detenga de forma automatica a los 2 minutos de grabacion
-- Logica del boton terminar
-- Reproducir video en la vista lista
-- Configurable
-- Solicitar permisos para grabar audio y video
-- Enviar videos
-- Retrocer a cualquier video en la vista video
-- Ir a la siguiente pregunta por responder
-  - Tener una estructura facil de modificar y se pueda extender a mas de las 4 preguntas que se solicito.
+![Imagen del Proyecto](https://www.krowdy.com/images/seo/home.png)
+Graba respuestas a 4 preguntas. Haz clic para grabar y otorga permisos. Pausa, reanuda y detén a los 2 minutos. Regrabar si es necesario y termina. Reproduce y envía tus respuestas.Personaliza con más preguntas en questions.json.
+
+##[UI en Figma](https://www.figma.com/file/qqx6eaZ9vZNi6YMsSzyrKI/VOD?type=design&t=N8pgZwpoSTB7MWwE-6)
 
 ## Uso
 Para utilizar la aplicación, siga estos pasos:
@@ -33,7 +23,20 @@ Puede navegar entre diferentes preguntas usando la lista de navegación en el la
 
 Nota: La funcionalidad de la aplicación se puede ampliar modificando el questions.jsonarchivo ubicado en el /src/pagesdirectorio. Puede agregar o eliminar preguntas según lo desee.
 
-La aplicación se puede ejecutar localmente abriendo el proyecto en Visual Studio Code y ejecutándolo en un servidor local.
+## Principales funcionalidades
+- Se pueda cambiar de vista
+- Se pueda grabar
+- Regrabar
+- Detener
+- Que detenga de forma automatica a los 2 minutos de grabacion
+- Logica del boton terminar
+- Reproducir video en la vista lista
+- Configurable
+- Solicitar permisos para grabar audio y video
+- Enviar videos
+- Retrocer a cualquier video en la vista video
+- Ir a la siguiente pregunta por responder
+  - Tener una estructura facil de modificar y se pueda extender a mas de las 4 preguntas que se solicito.
 
 ## Tecnologías
 - WebRTC
