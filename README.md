@@ -3,7 +3,7 @@
 ![Imagen del Proyecto](https://www.krowdy.com/images/seo/home.png)
 Graba respuestas a 4 preguntas. Haz clic para grabar y otorga permisos. Pausa, reanuda y detén a los 2 minutos. Regrabar si es necesario y termina. Reproduce y envía tus respuestas.Personaliza con más preguntas en questions.json.
 
-##[UI en Figma](https://www.figma.com/file/qqx6eaZ9vZNi6YMsSzyrKI/VOD?type=design&t=N8pgZwpoSTB7MWwE-6)
+## [UI en Figma](https://www.figma.com/file/qqx6eaZ9vZNi6YMsSzyrKI/VOD?type=design&t=N8pgZwpoSTB7MWwE-6)
 
 ## Uso
 Para utilizar la aplicación, siga estos pasos:
