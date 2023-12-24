@@ -1,9 +1,14 @@
-# [Videocuestionario KrowdyBootcamp](https://videocuestionario-krowdy-bootcamp.vercel.app/)
-
 ![Imagen del Proyecto](https://www.krowdy.com/images/seo/home.png)
-Graba respuestas a 4 preguntas. Haz clic para grabar y otorga permisos. Pausa, reanuda y detén a los 2 minutos. Regrabar si es necesario y termina. Reproduce y envía tus respuestas.Personaliza con más preguntas en questions.json.
 
+# [Videocuestionario KrowdyBootcamp](https://videocuestionario-krowdy-bootcamp.vercel.app/)
 ## [UI en Figma](https://www.figma.com/file/qqx6eaZ9vZNi6YMsSzyrKI/VOD?type=design&t=N8pgZwpoSTB7MWwE-6)
+
+Es una herramienta intuitiva, diseñada para optimizar el proceso de entrevistas a través de video
+respuestas. Ofrece una plataforma de grabación donde las respuestas son grabadas y enviadas. Creada
+con WebRTC y JavaScript, facilita la interacción sin complicaciones, permitiendo grabar, pausar y reanudar
+con facilidad, además de configurar preguntas adicionales según se desee. Su diseño claro y su
+funcionalidad automática, que detiene las grabaciones a los dos minutos, convierte la gestión y envío de
+las respuestas en un proceso sencillo y eficiente, fundamental para cualquier proceso de selección actual.
 
 ## Uso
 Para utilizar la aplicación, siga estos pasos:
@@ -22,21 +27,6 @@ Puede navegar entre diferentes preguntas usando la lista de navegación en el la
 - Puede enviar todos los videos apretando el boton "enviar".
 
 Nota: La funcionalidad de la aplicación se puede ampliar modificando el questions.jsonarchivo ubicado en el /src/pagesdirectorio. Puede agregar o eliminar preguntas según lo desee.
-
-## Principales funcionalidades
-- Se pueda cambiar de vista
-- Se pueda grabar
-- Regrabar
-- Detener
-- Que detenga de forma automatica a los 2 minutos de grabacion
-- Logica del boton terminar
-- Reproducir video en la vista lista
-- Configurable
-- Solicitar permisos para grabar audio y video
-- Enviar videos
-- Retrocer a cualquier video en la vista video
-- Ir a la siguiente pregunta por responder
-  - Tener una estructura facil de modificar y se pueda extender a mas de las 4 preguntas que se solicito.
 
 ## Tecnologías
 - WebRTC
