@@ -1,4 +1,4 @@
-![Imagen del Proyecto]([https://www.krowdy.com/images/seo/home.png](https://resources.krowdy.com/krowdy/company/618296c057eb190007bbbd5b/2021-11-04T11-35-16-068ZFrame_2.png))
+![Imagen del Proyecto](https://www.krowdy.com/images/seo/home.png](https://resources.krowdy.com/krowdy/company/618296c057eb190007bbbd5b/2021-11-04T11-35-16-068ZFrame_2.png)
 
 # [Videocuestionario KrowdyBootcamp](https://videocuestionario-krowdy-bootcamp.vercel.app/)
 
